@@ -8,8 +8,6 @@ use OnaOnbir\OOMetas\OOMetas;
 
 trait HasMetas
 {
-
-
     public function __get($key)
     {
         if ($this->hasMetaKey($key)) {
@@ -23,6 +21,7 @@ trait HasMetas
     {
         if ($this->hasMetaKey($key)) {
             $this->setMeta($key, $value);
+
             return;
         }
 
