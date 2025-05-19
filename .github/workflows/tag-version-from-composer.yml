@@ -1,0 +1,27 @@
+name: Tag from Composer Version
+
+on:
+  push:
+    branches:
+      - main  # veya production, master, vs.
+
+jobs:
+  tag-version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Read version from composer.json
+        id: version
+        run: |
+          VERSION=$(jq -r .version composer.json)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${{ steps.version.outputs.version }}" -m "Version v${{ steps.version.outputs.version }}"
+          git push origin "v${{ steps.version.outputs.version }}"
