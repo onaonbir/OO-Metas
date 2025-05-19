@@ -1,20 +1,21 @@
 {
     "name": "onaonbir/oo-metas",
+    "description": "Flexible and extensible metadata management system for Laravel models.",
+    "type": "library",
+    "keywords": ["laravel", "metadata", "metas", "polymorphic", "package"],
+    "license": "MIT",
     "version": "1.0.0",
-    "autoload": {
-        "files": [
 
-        ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/support": "^10.0|^11.0|^12.0"
+    },
+
+    "autoload": {
         "psr-4": {
             "OnaOnbir\\OOMetas\\": "src/"
         }
     },
-    "authors": [
-        {
-            "name": "bariskanberkay",
-            "email": "berkaybariskan0208@gmail.com"
-        }
-    ],
     "extra": {
         "laravel": {
             "providers": [
@@ -22,7 +23,18 @@
             ]
         }
     },
-    "require": {
+    "authors": [
+        {
+            "name": "Berkay Barışkan",
+            "email": "berkaybariskan0208@gmail.com"
+        }
+    ],
 
-    }
+    "support": {
+        "issues": "https://github.com/onaonbir/oo-metas/issues",
+        "source": "https://github.com/onaonbir/oo-metas"
+    },
+
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
