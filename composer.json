@@ -1,0 +1,28 @@
+{
+    "name": "onaonbir/oo-metas",
+    "version": "1.0.0",
+    "autoload": {
+        "files": [
+
+        ],
+        "psr-4": {
+            "OnaOnbir\\OOMetas\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "bariskanberkay",
+            "email": "berkaybariskan0208@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "OnaOnbir\\OOMetas\\OOMetasServiceProvider"
+            ]
+        }
+    },
+    "require": {
+
+    }
+}
