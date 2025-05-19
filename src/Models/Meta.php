@@ -13,7 +13,6 @@ class Meta extends Model
     public function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
-
         $this->table = config('oo-metas.table_names.oo_metas', 'oo_metas');
     }
 
