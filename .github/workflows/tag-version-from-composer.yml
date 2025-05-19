@@ -22,9 +22,16 @@ jobs:
           VERSION=$(jq -r .version composer.json)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Create Git tag
+      - name: Create Git tag (if not exists)
         run: |
+          VERSION="v${{ steps.version.outputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "v${{ steps.version.outputs.version }}" -m "Version v${{ steps.version.outputs.version }}"
-          git push origin "v${{ steps.version.outputs.version }}"
+
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "✅ Tag $VERSION already exists. Skipping tagging."
+          else
+            git tag -a "$VERSION" -m "Version $VERSION"
+            git push origin "$VERSION"
+            echo "🚀 Tag $VERSION created and pushed."
+          fi
