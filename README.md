@@ -42,12 +42,6 @@ It allows you to attach dynamic key-value data to any model, with optional `conn
 
 ### 1. ✅ Using the `OOMetas` Service
 
-Import the class:
-
-```php
-use OnaOnbir\OOMetas\OOMetas;
-```
-
 #### ➕ Set Metadata
 
 ```php
