@@ -5,6 +5,9 @@ on:
     branches:
       - main  # veya production, master, vs.
 
+permissions:
+  contents: write
+
 jobs:
   tag-version:
     runs-on: ubuntu-latest
