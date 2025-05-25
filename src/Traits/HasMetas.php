@@ -18,9 +18,9 @@ trait HasMetas
         OOMetas::set($this, $key, $value, $connected);
     }
 
-    public function forgetMeta(string $key, ?object $connected = null): void
+    public function forgetMeta(string $key): void
     {
-        OOMetas::forget($this, $key, $connected);
+        OOMetas::forget($this, $key);
     }
 
     public function metas(): MorphMany

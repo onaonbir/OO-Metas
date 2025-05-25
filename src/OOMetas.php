@@ -86,7 +86,7 @@ class OOMetas
         $query->save();
     }
 
-    public static function forget(object $model, string $key, ?object $connected = null): void
+    public static function forget(object $model, string $key): void
     {
         [$mainKey, $nestedKey] = self::splitKey($key);
 
@@ -94,12 +94,6 @@ class OOMetas
             ->where('model_id', $model->getKey())
             ->where('key', $mainKey);
 
-        if ($connected) {
-            $query->where('connected_type', get_class($connected))
-                ->where('connected_id', $connected->getKey());
-        } else {
-            $query->whereNull('connected_type')->whereNull('connected_id');
-        }
 
         $meta = $query->first();
 
