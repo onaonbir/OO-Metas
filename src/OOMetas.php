@@ -94,7 +94,6 @@ class OOMetas
             ->where('model_id', $model->getKey())
             ->where('key', $mainKey);
 
-
         $meta = $query->first();
 
         if (! $meta) {
