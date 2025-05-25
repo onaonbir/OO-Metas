@@ -59,7 +59,6 @@ class OOMetas
             : data_get($meta->value, $nestedKey, $default);
     }
 
-
     public static function set(object $model, string $key, mixed $value, ?object $connected = null): void
     {
         [$mainKey, $nestedKey] = self::splitKey($key);
