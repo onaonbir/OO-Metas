@@ -7,33 +7,58 @@ use OnaOnbir\OOMetas\Models\Meta;
 
 class OOMetas
 {
-    public static function get(object $model, string $key, mixed $default = null, ?object $connected = null): mixed
+    public static function get(object $model, string $key, mixed $default = null, object|string|null $connected = null): mixed
     {
         [$mainKey, $nestedKey] = self::splitKey($key);
 
-        $query = Meta::where('model_type', get_class($model))
-            ->where('model_id', $model->getKey())
+        $baseQuery = Meta::where('model_type', get_class($model))
+            ->where('model_id', (string) $model->getKey())
             ->where('key', $mainKey);
 
-        if ($connected) {
-            $query->where('connected_type', get_class($connected))
-                ->where('connected_id', $connected->getKey());
-        } else {
-            $query->whereNull('connected_type')->whereNull('connected_id');
+        // eğer connected model verildiyse (object)
+        if (is_object($connected)) {
+            $query = (clone $baseQuery)
+                ->where('connected_type', get_class($connected))
+                ->where('connected_id', (string) $connected->getKey());
+
+            $meta = $query->first();
+
+            if ($meta) {
+                return is_null($nestedKey)
+                    ? $meta->value
+                    : data_get($meta->value, $nestedKey, $default);
+            }
         }
 
-        $meta = $query->first();
+        // eğer connected string olarak verildiyse (örn. Workspace::class)
+        if (is_string($connected)) {
+            $query = (clone $baseQuery)
+                ->where('connected_type', $connected);
+
+            $meta = $query->first();
+
+            if ($meta) {
+                return is_null($nestedKey)
+                    ? $meta->value
+                    : data_get($meta->value, $nestedKey, $default);
+            }
+        }
+
+        // fallback: connected null olan değer
+        $meta = (clone $baseQuery)
+            ->whereNull('connected_type')
+            ->whereNull('connected_id')
+            ->first();
 
         if (! $meta) {
             return $default;
         }
 
-        if (is_null($nestedKey)) {
-            return $meta->value;
-        }
-
-        return data_get($meta->value, $nestedKey, $default);
+        return is_null($nestedKey)
+            ? $meta->value
+            : data_get($meta->value, $nestedKey, $default);
     }
+
 
     public static function set(object $model, string $key, mixed $value, ?object $connected = null): void
     {

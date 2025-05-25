@@ -8,7 +8,7 @@ use OnaOnbir\OOMetas\OOMetas;
 
 trait HasMetas
 {
-    public function getMeta(string $key, mixed $default = null, ?object $connected = null): mixed
+    public function getMeta(string $key, mixed $default = null, object|string|null $connected = null): mixed
     {
         return OOMetas::get($this, $key, $default, $connected);
     }
