@@ -79,7 +79,7 @@ class OOMetas
             $data = $query->value ?? [];
 
             // Eğer mevcut value array değilse boş array yap
-            if (!is_array($data)) {
+            if (! is_array($data)) {
                 $data = [];
             }
 
@@ -150,7 +150,7 @@ class OOMetas
 
         $meta = $query->first();
 
-        if (!$meta) {
+        if (! $meta) {
             return false;
         }
 
