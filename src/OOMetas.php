@@ -71,14 +71,18 @@ class OOMetas
             'connected_id' => $connected ? $connected->getKey() : null,
         ]);
 
-        if (! is_array($query->value)) {
-            $query->value = [];
-        }
-
         if (is_null($nestedKey)) {
+            // Direkt değer atama
             $query->value = $value;
         } else {
+            // Nested key için mevcut veriyi koru ve merge et
             $data = $query->value ?? [];
+
+            // Eğer mevcut value array değilse boş array yap
+            if (!is_array($data)) {
+                $data = [];
+            }
+
             data_set($data, $nestedKey, $value);
             $query->value = $data;
         }
@@ -86,13 +90,24 @@ class OOMetas
         $query->save();
     }
 
-    public static function forget(object $model, string $key): void
+    public static function forget(object $model, string $key, ?object $connected = null): void
     {
         [$mainKey, $nestedKey] = self::splitKey($key);
 
-        $query = Meta::where('model_type', get_class($model))
+        $baseQuery = Meta::where('model_type', get_class($model))
             ->where('model_id', $model->getKey())
             ->where('key', $mainKey);
+
+        // Connected parametresi için query'yi düzenle
+        if (is_object($connected)) {
+            $query = (clone $baseQuery)
+                ->where('connected_type', get_class($connected))
+                ->where('connected_id', $connected->getKey());
+        } else {
+            $query = (clone $baseQuery)
+                ->whereNull('connected_type')
+                ->whereNull('connected_id');
+        }
 
         $meta = $query->first();
 
@@ -104,10 +119,80 @@ class OOMetas
             $meta->delete();
         } else {
             $data = $meta->value;
-            Arr::forget($data, $nestedKey);
-            $meta->value = $data;
-            $meta->save();
+            if (is_array($data)) {
+                Arr::forget($data, $nestedKey);
+                $meta->value = $data;
+                $meta->save();
+            }
         }
+    }
+
+    public static function has(object $model, string $key, object|string|null $connected = null): bool
+    {
+        [$mainKey, $nestedKey] = self::splitKey($key);
+
+        $baseQuery = Meta::where('model_type', get_class($model))
+            ->where('model_id', (string) $model->getKey())
+            ->where('key', $mainKey);
+
+        if (is_object($connected)) {
+            $query = (clone $baseQuery)
+                ->where('connected_type', get_class($connected))
+                ->where('connected_id', (string) $connected->getKey());
+        } elseif (is_string($connected)) {
+            $query = (clone $baseQuery)
+                ->where('connected_type', $connected);
+        } else {
+            $query = (clone $baseQuery)
+                ->whereNull('connected_type')
+                ->whereNull('connected_id');
+        }
+
+        $meta = $query->first();
+
+        if (!$meta) {
+            return false;
+        }
+
+        if (is_null($nestedKey)) {
+            return true;
+        }
+
+        return data_get($meta->value, $nestedKey) !== null;
+    }
+
+    public static function increment(object $model, string $key, int $value = 1, ?object $connected = null): int
+    {
+        $current = self::get($model, $key, 0, $connected);
+        $newValue = (int) $current + $value;
+        self::set($model, $key, $newValue, $connected);
+
+        return $newValue;
+    }
+
+    public static function decrement(object $model, string $key, int $value = 1, ?object $connected = null): int
+    {
+        return self::increment($model, $key, -$value, $connected);
+    }
+
+    public static function pull(object $model, string $key, mixed $default = null, ?object $connected = null): mixed
+    {
+        $value = self::get($model, $key, $default, $connected);
+        self::forget($model, $key, $connected);
+
+        return $value;
+    }
+
+    public static function remember(object $model, string $key, callable $callback, ?object $connected = null): mixed
+    {
+        if (self::has($model, $key, $connected)) {
+            return self::get($model, $key, null, $connected);
+        }
+
+        $value = $callback();
+        self::set($model, $key, $value, $connected);
+
+        return $value;
     }
 
     protected static function splitKey(string $key): array
