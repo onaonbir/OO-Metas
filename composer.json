@@ -4,7 +4,7 @@
     "type": "library",
     "keywords": ["laravel", "metadata", "metas", "polymorphic", "package"],
     "license": "MIT",
-    "version": "1.0.4",
+    "version": "1.0.5",
 
     "require": {
         "php": "^8.3",
@@ -14,6 +14,11 @@
     "autoload": {
         "psr-4": {
             "OnaOnbir\\OOMetas\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "OnaOnbir\\OOMetas\\Tests\\": "tests/"
         }
     },
     "extra": {

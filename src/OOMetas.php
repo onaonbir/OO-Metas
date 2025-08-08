@@ -1,204 +1,123 @@
 <?php
 
+declare(strict_types=1);
+
 namespace OnaOnbir\OOMetas;
 
-use Illuminate\Support\Arr;
-use OnaOnbir\OOMetas\Models\Meta;
+use Illuminate\Database\Eloquent\Model;
+use OnaOnbir\OOMetas\Contracts\MetaServiceInterface;
 
+/**
+ * OOMetas Facade
+ * 
+ * This class provides a static interface to the MetaService
+ * for backward compatibility and convenience.
+ */
 class OOMetas
 {
-    public static function get(object $model, string $key, mixed $default = null, object|string|null $connected = null): mixed
+    protected static ?MetaServiceInterface $service = null;
+
+    protected static function getService(): MetaServiceInterface
     {
-        [$mainKey, $nestedKey] = self::splitKey($key);
-
-        $baseQuery = Meta::where('model_type', get_class($model))
-            ->where('model_id', (string) $model->getKey())
-            ->where('key', $mainKey);
-
-        // eğer connected model verildiyse (object)
-        if (is_object($connected)) {
-            $query = (clone $baseQuery)
-                ->where('connected_type', get_class($connected))
-                ->where('connected_id', (string) $connected->getKey());
-
-            $meta = $query->first();
-
-            if ($meta) {
-                return is_null($nestedKey)
-                    ? $meta->value
-                    : data_get($meta->value, $nestedKey, $default);
-            }
+        if (self::$service === null) {
+            self::$service = app(MetaServiceInterface::class);
         }
-
-        // eğer connected string olarak verildiyse (örn. Workspace::class)
-        if (is_string($connected)) {
-            $query = (clone $baseQuery)
-                ->where('connected_type', $connected);
-
-            $meta = $query->first();
-
-            if ($meta) {
-                return is_null($nestedKey)
-                    ? $meta->value
-                    : data_get($meta->value, $nestedKey, $default);
-            }
-        }
-
-        // fallback: connected null olan değer
-        $meta = (clone $baseQuery)
-            ->whereNull('connected_type')
-            ->whereNull('connected_id')
-            ->first();
-
-        if (! $meta) {
-            return $default;
-        }
-
-        return is_null($nestedKey)
-            ? $meta->value
-            : data_get($meta->value, $nestedKey, $default);
+        
+        return self::$service;
     }
 
-    public static function set(object $model, string $key, mixed $value, ?object $connected = null): void
+    public static function setService(MetaServiceInterface $service): void
     {
-        [$mainKey, $nestedKey] = self::splitKey($key);
-
-        $query = Meta::firstOrNew([
-            'model_type' => get_class($model),
-            'model_id' => $model->getKey(),
-            'key' => $mainKey,
-            'connected_type' => $connected ? get_class($connected) : null,
-            'connected_id' => $connected ? $connected->getKey() : null,
-        ]);
-
-        if (is_null($nestedKey)) {
-            // Direkt değer atama
-            $query->value = $value;
-        } else {
-            // Nested key için mevcut veriyi koru ve merge et
-            $data = $query->value ?? [];
-
-            // Eğer mevcut value array değilse boş array yap
-            if (!is_array($data)) {
-                $data = [];
-            }
-
-            data_set($data, $nestedKey, $value);
-            $query->value = $data;
-        }
-
-        $query->save();
+        self::$service = $service;
     }
 
-    public static function forget(object $model, string $key, ?object $connected = null): void
+    // Basic operations
+    public static function get(Model $model, string $key, mixed $default = null, Model|string|null $connected = null): mixed
     {
-        [$mainKey, $nestedKey] = self::splitKey($key);
-
-        $baseQuery = Meta::where('model_type', get_class($model))
-            ->where('model_id', $model->getKey())
-            ->where('key', $mainKey);
-
-        // Connected parametresi için query'yi düzenle
-        if (is_object($connected)) {
-            $query = (clone $baseQuery)
-                ->where('connected_type', get_class($connected))
-                ->where('connected_id', $connected->getKey());
-        } else {
-            $query = (clone $baseQuery)
-                ->whereNull('connected_type')
-                ->whereNull('connected_id');
-        }
-
-        $meta = $query->first();
-
-        if (! $meta) {
-            return;
-        }
-
-        if (is_null($nestedKey)) {
-            $meta->delete();
-        } else {
-            $data = $meta->value;
-            if (is_array($data)) {
-                Arr::forget($data, $nestedKey);
-                $meta->value = $data;
-                $meta->save();
-            }
-        }
+        return self::getService()->get($model, $key, $default, $connected);
     }
 
-    public static function has(object $model, string $key, object|string|null $connected = null): bool
+    public static function set(Model $model, string $key, mixed $value, ?Model $connected = null): void
     {
-        [$mainKey, $nestedKey] = self::splitKey($key);
-
-        $baseQuery = Meta::where('model_type', get_class($model))
-            ->where('model_id', (string) $model->getKey())
-            ->where('key', $mainKey);
-
-        if (is_object($connected)) {
-            $query = (clone $baseQuery)
-                ->where('connected_type', get_class($connected))
-                ->where('connected_id', (string) $connected->getKey());
-        } elseif (is_string($connected)) {
-            $query = (clone $baseQuery)
-                ->where('connected_type', $connected);
-        } else {
-            $query = (clone $baseQuery)
-                ->whereNull('connected_type')
-                ->whereNull('connected_id');
-        }
-
-        $meta = $query->first();
-
-        if (!$meta) {
-            return false;
-        }
-
-        if (is_null($nestedKey)) {
-            return true;
-        }
-
-        return data_get($meta->value, $nestedKey) !== null;
+        self::getService()->set($model, $key, $value, $connected);
     }
 
-    public static function increment(object $model, string $key, int $value = 1, ?object $connected = null): int
+    public static function forget(Model $model, string $key, ?Model $connected = null): void
     {
-        $current = self::get($model, $key, 0, $connected);
-        $newValue = (int) $current + $value;
-        self::set($model, $key, $newValue, $connected);
-
-        return $newValue;
+        self::getService()->forget($model, $key, $connected);
     }
 
-    public static function decrement(object $model, string $key, int $value = 1, ?object $connected = null): int
+    public static function has(Model $model, string $key, Model|string|null $connected = null): bool
     {
-        return self::increment($model, $key, -$value, $connected);
+        return self::getService()->has($model, $key, $connected);
     }
 
-    public static function pull(object $model, string $key, mixed $default = null, ?object $connected = null): mixed
+    // Batch operations
+    public static function getMany(Model $model, array $keys, Model|string|null $connected = null): array
     {
-        $value = self::get($model, $key, $default, $connected);
-        self::forget($model, $key, $connected);
-
-        return $value;
+        return self::getService()->getMany($model, $keys, $connected);
     }
 
-    public static function remember(object $model, string $key, callable $callback, ?object $connected = null): mixed
+    public static function setMany(Model $model, array $values, ?Model $connected = null): void
     {
-        if (self::has($model, $key, $connected)) {
-            return self::get($model, $key, null, $connected);
-        }
-
-        $value = $callback();
-        self::set($model, $key, $value, $connected);
-
-        return $value;
+        self::getService()->setMany($model, $values, $connected);
     }
 
-    protected static function splitKey(string $key): array
+    public static function forgetMany(Model $model, array $keys, ?Model $connected = null): void
     {
-        return str_contains($key, '.')
-            ? explode('.', $key, 2)
-            : [$key, null];
+        self::getService()->forgetMany($model, $keys, $connected);
+    }
+
+    public static function getAll(Model $model, ?Model $connected = null): array
+    {
+        return self::getService()->getAll($model, $connected);
+    }
+
+    public static function forgetAll(Model $model, ?Model $connected = null): void
+    {
+        self::getService()->forgetAll($model, $connected);
+    }
+
+    // Numeric operations
+    public static function increment(Model $model, string $key, int $value = 1, ?Model $connected = null): int
+    {
+        return self::getService()->increment($model, $key, $value, $connected);
+    }
+
+    public static function decrement(Model $model, string $key, int $value = 1, ?Model $connected = null): int
+    {
+        return self::getService()->decrement($model, $key, $value, $connected);
+    }
+
+    // Special operations
+    public static function pull(Model $model, string $key, mixed $default = null, ?Model $connected = null): mixed
+    {
+        return self::getService()->pull($model, $key, $default, $connected);
+    }
+
+    public static function remember(Model $model, string $key, callable $callback, ?Model $connected = null): mixed
+    {
+        return self::getService()->remember($model, $key, $callback, $connected);
+    }
+
+    public static function toggle(Model $model, string $key, ?Model $connected = null): bool
+    {
+        return self::getService()->toggle($model, $key, $connected);
+    }
+
+    // Array operations
+    public static function append(Model $model, string $key, mixed $value, ?Model $connected = null): array
+    {
+        return self::getService()->append($model, $key, $value, $connected);
+    }
+
+    public static function prepend(Model $model, string $key, mixed $value, ?Model $connected = null): array
+    {
+        return self::getService()->prepend($model, $key, $value, $connected);
+    }
+
+    public static function removeFromArray(Model $model, string $key, mixed $value, ?Model $connected = null): array
+    {
+        return self::getService()->removeFromArray($model, $key, $value, $connected);
     }
 }
