@@ -13,6 +13,7 @@ use OnaOnbir\OOMetas\Repositories\CachedMetaRepository;
 use OnaOnbir\OOMetas\Repositories\MetaRepository;
 use OnaOnbir\OOMetas\Services\MetaCacheService;
 use OnaOnbir\OOMetas\Services\MetaService;
+use OnaOnbir\OOMetas\Console;
 
 class OOMetasServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,7 @@ class OOMetasServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         $this->bootPublishing();
+        $this->bootCommands();
     }
 
     public function register(): void
@@ -48,11 +50,15 @@ class OOMetasServiceProvider extends ServiceProvider
             );
         });
 
-        // Register Repository
+        // Register Repository with Auto-Cache Detection
         $this->app->singleton(MetaRepositoryInterface::class, function ($app) {
             $baseRepository = new MetaRepository;
 
-            if (config('oo-metas.cache.enabled', true)) {
+            // Auto-enable cache if any cache driver is configured (except 'null')
+            $cacheDriver = config('cache.default', 'null');
+            $cacheEnabled = config('oo-metas.cache.enabled', true);
+
+            if ($cacheEnabled && $cacheDriver !== 'null' && $cacheDriver !== 'array') {
                 return new CachedMetaRepository(
                     $baseRepository,
                     $app->make(MetaCacheInterface::class)
@@ -79,5 +85,15 @@ class OOMetasServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../config/'.$this->packageName.'.php' => config_path($this->packageName.'.php'),
         ], $this->packageName.'-config');
+    }
+
+    protected function bootCommands(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Console\OOMetasStatusCommand::class,
+                Console\OOMetasClearCacheCommand::class,
+            ]);
+        }
     }
 }
