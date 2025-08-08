@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace OnaOnbir\OOMetas\Traits;
 
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Model;
-use OnaOnbir\OOMetas\Models\Meta;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use OnaOnbir\OOMetas\Contracts\MetaServiceInterface;
+use OnaOnbir\OOMetas\Models\Meta;
 
 trait HasMetas
 {
@@ -116,30 +116,35 @@ trait HasMetas
     public function getMetaAsArray(string $key, ?Model $connected = null): array
     {
         $value = $this->getMeta($key, [], $connected);
+
         return is_array($value) ? $value : [];
     }
 
     public function getMetaAsString(string $key, string $default = '', ?Model $connected = null): string
     {
         $value = $this->getMeta($key, $default, $connected);
+
         return is_string($value) ? $value : (string) $value;
     }
 
     public function getMetaAsInt(string $key, int $default = 0, ?Model $connected = null): int
     {
         $value = $this->getMeta($key, $default, $connected);
+
         return is_int($value) ? $value : (int) $value;
     }
 
     public function getMetaAsBool(string $key, bool $default = false, ?Model $connected = null): bool
     {
         $value = $this->getMeta($key, $default, $connected);
+
         return is_bool($value) ? $value : (bool) $value;
     }
 
     public function getMetaAsFloat(string $key, float $default = 0.0, ?Model $connected = null): float
     {
         $value = $this->getMeta($key, $default, $connected);
+
         return is_float($value) ? $value : (float) $value;
     }
 }

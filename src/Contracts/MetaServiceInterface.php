@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace OnaOnbir\OOMetas\Contracts;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Collection;
 
 interface MetaServiceInterface
 {
@@ -17,7 +16,7 @@ interface MetaServiceInterface
     /**
      * Get multiple meta values.
      *
-     * @param array<string> $keys
+     * @param  array<string>  $keys
      * @return array<string, mixed>
      */
     public function getMany(Model $model, array $keys, Model|string|null $connected = null): array;
@@ -37,7 +36,7 @@ interface MetaServiceInterface
     /**
      * Set multiple meta values.
      *
-     * @param array<string, mixed> $values
+     * @param  array<string, mixed>  $values
      */
     public function setMany(Model $model, array $values, ?Model $connected = null): void;
 
@@ -49,7 +48,7 @@ interface MetaServiceInterface
     /**
      * Forget multiple meta values.
      *
-     * @param array<string> $keys
+     * @param  array<string>  $keys
      */
     public function forgetMany(Model $model, array $keys, ?Model $connected = null): void;
 

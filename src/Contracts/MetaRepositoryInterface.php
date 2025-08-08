@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace OnaOnbir\OOMetas\Contracts;
 
 use Illuminate\Database\Eloquent\Collection;
+use OnaOnbir\OOMetas\Models\Meta;
 use OnaOnbir\OOMetas\ValueObjects\MetaIdentifier;
 use OnaOnbir\OOMetas\ValueObjects\MetaKey;
-use OnaOnbir\OOMetas\Models\Meta;
 
 interface MetaRepositoryInterface
 {
@@ -19,7 +19,7 @@ interface MetaRepositoryInterface
     /**
      * Get multiple meta records by identifier and keys.
      *
-     * @param array<MetaKey> $keys
+     * @param  array<MetaKey>  $keys
      * @return Collection<Meta>
      */
     public function findMany(MetaIdentifier $identifier, array $keys): Collection;
@@ -37,7 +37,7 @@ interface MetaRepositoryInterface
     /**
      * Create or update multiple meta records.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return Collection<Meta>
      */
     public function saveMany(MetaIdentifier $identifier, array $data): Collection;
@@ -50,7 +50,7 @@ interface MetaRepositoryInterface
     /**
      * Delete multiple meta records.
      *
-     * @param array<MetaKey> $keys
+     * @param  array<MetaKey>  $keys
      */
     public function deleteMany(MetaIdentifier $identifier, array $keys): int;
 

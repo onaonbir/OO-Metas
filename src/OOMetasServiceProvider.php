@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace OnaOnbir\OOMetas;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\Repository as CacheRepository;
-use OnaOnbir\OOMetas\Contracts\MetaRepositoryInterface;
+use Illuminate\Support\ServiceProvider;
 use OnaOnbir\OOMetas\Contracts\MetaCacheInterface;
+use OnaOnbir\OOMetas\Contracts\MetaRepositoryInterface;
 use OnaOnbir\OOMetas\Contracts\MetaServiceInterface;
-use OnaOnbir\OOMetas\Repositories\MetaRepository;
 use OnaOnbir\OOMetas\Repositories\CachedMetaRepository;
+use OnaOnbir\OOMetas\Repositories\MetaRepository;
 use OnaOnbir\OOMetas\Services\MetaCacheService;
 use OnaOnbir\OOMetas\Services\MetaService;
 
@@ -21,7 +21,7 @@ class OOMetasServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-        
+
         $this->bootPublishing();
     }
 
@@ -50,15 +50,15 @@ class OOMetasServiceProvider extends ServiceProvider
 
         // Register Repository
         $this->app->singleton(MetaRepositoryInterface::class, function ($app) {
-            $baseRepository = new MetaRepository();
-            
+            $baseRepository = new MetaRepository;
+
             if (config('oo-metas.cache.enabled', true)) {
                 return new CachedMetaRepository(
                     $baseRepository,
                     $app->make(MetaCacheInterface::class)
                 );
             }
-            
+
             return $baseRepository;
         });
 

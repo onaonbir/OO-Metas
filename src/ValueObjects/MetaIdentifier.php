@@ -67,7 +67,7 @@ final readonly class MetaIdentifier
 
     public function getConnectionSignature(): ?string
     {
-        if (!$this->hasConnection()) {
+        if (! $this->hasConnection()) {
             return null;
         }
 
@@ -81,7 +81,7 @@ final readonly class MetaIdentifier
     public function getFullSignature(): string
     {
         $signature = $this->getModelSignature();
-        
+
         if ($connection = $this->getConnectionSignature()) {
             $signature .= "@{$connection}";
         }

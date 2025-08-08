@@ -21,9 +21,9 @@ class MetaRepository implements MetaRepositoryInterface
     public function findMany(MetaIdentifier $identifier, array $keys): Collection
     {
         $mainKeys = array_unique(
-            array_map(fn(MetaKey $key) => $key->getMainKey(), $keys)
+            array_map(fn (MetaKey $key) => $key->getMainKey(), $keys)
         );
-        
+
         return $this->buildBaseQuery($identifier)
             ->whereIn('key', $mainKeys)
             ->get();
@@ -38,16 +38,16 @@ class MetaRepository implements MetaRepositoryInterface
     {
         $meta = $this->buildQuery($identifier, $key)->first();
 
-        if (!$meta) {
-            $meta = new Meta();
+        if (! $meta) {
+            $meta = new Meta;
             $meta->fill($identifier->toArray());
             $meta->key = $key->getMainKey();
         }
 
         if ($key->isNested()) {
             $currentValue = $meta->value ?? [];
-            
-            if (!is_array($currentValue)) {
+
+            if (! is_array($currentValue)) {
                 $currentValue = [];
             }
 
@@ -79,26 +79,27 @@ class MetaRepository implements MetaRepositoryInterface
     {
         $meta = $this->buildQuery($identifier, $key)->first();
 
-        if (!$meta) {
+        if (! $meta) {
             return false;
         }
 
         if ($key->isNested()) {
             $currentValue = $meta->value;
-            
+
             if (is_array($currentValue)) {
                 Arr::forget($currentValue, $key->getNestedKey());
-                
+
                 // If the array becomes empty, delete the whole meta
                 if (empty($currentValue)) {
                     return $meta->delete();
                 }
-                
+
                 $meta->value = $currentValue;
                 $meta->save();
+
                 return true;
             }
-            
+
             return false;
         }
 
@@ -108,9 +109,9 @@ class MetaRepository implements MetaRepositoryInterface
     public function deleteMany(MetaIdentifier $identifier, array $keys): int
     {
         $mainKeys = array_unique(
-            array_map(fn(MetaKey $key) => $key->getMainKey(), $keys)
+            array_map(fn (MetaKey $key) => $key->getMainKey(), $keys)
         );
-        
+
         return $this->buildBaseQuery($identifier)
             ->whereIn('key', $mainKeys)
             ->delete();
@@ -125,7 +126,7 @@ class MetaRepository implements MetaRepositoryInterface
     {
         $meta = $this->buildQuery($identifier, $key)->first();
 
-        if (!$meta) {
+        if (! $meta) {
             return false;
         }
 
@@ -148,13 +149,13 @@ class MetaRepository implements MetaRepositoryInterface
 
         if ($identifier->hasFullConnection()) {
             $query->where('connected_type', $identifier->connectedType)
-                  ->where('connected_id', $identifier->connectedId);
+                ->where('connected_id', $identifier->connectedId);
         } elseif ($identifier->hasTypeOnlyConnection()) {
             $query->where('connected_type', $identifier->connectedType)
-                  ->whereNull('connected_id');
+                ->whereNull('connected_id');
         } else {
             $query->whereNull('connected_type')
-                  ->whereNull('connected_id');
+                ->whereNull('connected_id');
         }
 
         return $query;

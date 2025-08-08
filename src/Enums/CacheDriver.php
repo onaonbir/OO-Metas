@@ -15,7 +15,7 @@ enum CacheDriver: string
 
     public function getDescription(): string
     {
-        return match($this) {
+        return match ($this) {
             self::REDIS => 'Redis cache driver',
             self::MEMCACHED => 'Memcached cache driver',
             self::DATABASE => 'Database cache driver',
@@ -27,7 +27,7 @@ enum CacheDriver: string
 
     public function isDistributed(): bool
     {
-        return match($this) {
+        return match ($this) {
             self::REDIS, self::MEMCACHED, self::DATABASE => true,
             default => false,
         };
@@ -35,7 +35,7 @@ enum CacheDriver: string
 
     public function isPersistent(): bool
     {
-        return match($this) {
+        return match ($this) {
             self::REDIS, self::MEMCACHED, self::DATABASE, self::FILE => true,
             default => false,
         };

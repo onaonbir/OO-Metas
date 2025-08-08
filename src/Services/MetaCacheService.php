@@ -12,6 +12,7 @@ use OnaOnbir\OOMetas\ValueObjects\MetaKey;
 class MetaCacheService implements MetaCacheInterface
 {
     private string $prefix = 'oo_metas';
+
     private ?int $defaultTtl = null;
 
     public function __construct(
@@ -23,6 +24,7 @@ class MetaCacheService implements MetaCacheInterface
     public function get(MetaIdentifier $identifier, MetaKey $key): mixed
     {
         $cacheKey = $this->getCacheKey($identifier, $key);
+
         return $this->cache->get($cacheKey);
     }
 
@@ -41,18 +43,21 @@ class MetaCacheService implements MetaCacheInterface
     public function forget(MetaIdentifier $identifier, MetaKey $key): bool
     {
         $cacheKey = $this->getCacheKey($identifier, $key);
+
         return $this->cache->forget($cacheKey);
     }
 
     public function forgetByIdentifier(MetaIdentifier $identifier): bool
     {
         $pattern = $this->getIdentifierPattern($identifier);
+
         return $this->cache->forget($pattern);
     }
 
     public function has(MetaIdentifier $identifier, MetaKey $key): bool
     {
         $cacheKey = $this->getCacheKey($identifier, $key);
+
         return $this->cache->has($cacheKey);
     }
 
@@ -63,7 +68,7 @@ class MetaCacheService implements MetaCacheInterface
 
     public function getCacheKey(MetaIdentifier $identifier, MetaKey $key): string
     {
-        return $this->prefix . ':' . $identifier->getFullSignature() . ':' . $key->getFullKey();
+        return $this->prefix.':'.$identifier->getFullSignature().':'.$key->getFullKey();
     }
 
     public function getPrefix(): string
@@ -78,6 +83,6 @@ class MetaCacheService implements MetaCacheInterface
 
     private function getIdentifierPattern(MetaIdentifier $identifier): string
     {
-        return $this->prefix . ':' . $identifier->getFullSignature() . ':*';
+        return $this->prefix.':'.$identifier->getFullSignature().':*';
     }
 }

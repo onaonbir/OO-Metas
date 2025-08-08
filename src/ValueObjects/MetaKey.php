@@ -9,6 +9,7 @@ use OnaOnbir\OOMetas\Exceptions\InvalidMetaKeyException;
 final readonly class MetaKey
 {
     public string $mainKey;
+
     public ?string $nestedKey;
 
     public function __construct(public string $key)

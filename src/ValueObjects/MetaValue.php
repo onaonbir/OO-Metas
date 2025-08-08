@@ -8,9 +8,7 @@ use JsonSerializable;
 
 final readonly class MetaValue implements JsonSerializable
 {
-    public function __construct(public mixed $value)
-    {
-    }
+    public function __construct(public mixed $value) {}
 
     public static function make(mixed $value): self
     {

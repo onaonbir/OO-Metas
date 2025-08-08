@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace OnaOnbir\OOMetas\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Builder;
 use OnaOnbir\OOMetas\Models\Traits\JsonCast;
 use OnaOnbir\OOMetas\ValueObjects\MetaIdentifier;
 use OnaOnbir\OOMetas\ValueObjects\MetaKey;
@@ -51,17 +51,17 @@ class Meta extends Model
     public function scopeForIdentifier(Builder $query, MetaIdentifier $identifier): Builder
     {
         $query->where('model_type', $identifier->modelType)
-              ->where('model_id', $identifier->modelId);
+            ->where('model_id', $identifier->modelId);
 
         if ($identifier->hasFullConnection()) {
             $query->where('connected_type', $identifier->connectedType)
-                  ->where('connected_id', $identifier->connectedId);
+                ->where('connected_id', $identifier->connectedId);
         } elseif ($identifier->hasTypeOnlyConnection()) {
             $query->where('connected_type', $identifier->connectedType)
-                  ->whereNull('connected_id');
+                ->whereNull('connected_id');
         } else {
             $query->whereNull('connected_type')
-                  ->whereNull('connected_id');
+                ->whereNull('connected_id');
         }
 
         return $query;
@@ -75,25 +75,25 @@ class Meta extends Model
     public function scopeForModel(Builder $query, Model $model): Builder
     {
         return $query->where('model_type', get_class($model))
-                     ->where('model_id', (string) $model->getKey());
+            ->where('model_id', (string) $model->getKey());
     }
 
     public function scopeWithoutConnection(Builder $query): Builder
     {
         return $query->whereNull('connected_type')
-                     ->whereNull('connected_id');
+            ->whereNull('connected_id');
     }
 
     public function scopeWithConnection(Builder $query, Model $connected): Builder
     {
         return $query->where('connected_type', get_class($connected))
-                     ->where('connected_id', (string) $connected->getKey());
+            ->where('connected_id', (string) $connected->getKey());
     }
 
     public function scopeWithConnectionType(Builder $query, string $connectedType): Builder
     {
         return $query->where('connected_type', $connectedType)
-                     ->whereNull('connected_id');
+            ->whereNull('connected_id');
     }
 
     // Helper methods
@@ -105,11 +105,11 @@ class Meta extends Model
     public function setNestedValue(string $nestedKey, mixed $value): void
     {
         $currentValue = $this->value ?? [];
-        
-        if (!is_array($currentValue)) {
+
+        if (! is_array($currentValue)) {
             $currentValue = [];
         }
-        
+
         data_set($currentValue, $nestedKey, $value);
         $this->value = $currentValue;
     }

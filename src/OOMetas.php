@@ -9,7 +9,7 @@ use OnaOnbir\OOMetas\Contracts\MetaServiceInterface;
 
 /**
  * OOMetas Facade
- * 
+ *
  * This class provides a static interface to the MetaService
  * for backward compatibility and convenience.
  */
@@ -22,7 +22,7 @@ class OOMetas
         if (self::$service === null) {
             self::$service = app(MetaServiceInterface::class);
         }
-        
+
         return self::$service;
     }
 

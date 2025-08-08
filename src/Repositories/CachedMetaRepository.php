@@ -21,7 +21,7 @@ class CachedMetaRepository implements MetaRepositoryInterface
     public function find(MetaIdentifier $identifier, MetaKey $key): ?Meta
     {
         $cacheKey = $this->cache->getCacheKey($identifier, $key);
-        
+
         return cache()->remember($cacheKey, config('oo-metas.cache.ttl', 3600), function () use ($identifier, $key) {
             return $this->repository->find($identifier, $key);
         });
@@ -43,56 +43,56 @@ class CachedMetaRepository implements MetaRepositoryInterface
     public function save(MetaIdentifier $identifier, MetaKey $key, mixed $value): Meta
     {
         $meta = $this->repository->save($identifier, $key, $value);
-        
+
         // Update cache with the new value
         $this->cache->set($identifier, $key, $meta);
-        
+
         return $meta;
     }
 
     public function saveMany(MetaIdentifier $identifier, array $data): Collection
     {
         $metas = $this->repository->saveMany($identifier, $data);
-        
+
         // Clear cache for the identifier to ensure consistency
         $this->cache->forgetByIdentifier($identifier);
-        
+
         return $metas;
     }
 
     public function delete(MetaIdentifier $identifier, MetaKey $key): bool
     {
         $result = $this->repository->delete($identifier, $key);
-        
+
         if ($result) {
             $this->cache->forget($identifier, $key);
         }
-        
+
         return $result;
     }
 
     public function deleteMany(MetaIdentifier $identifier, array $keys): int
     {
         $result = $this->repository->deleteMany($identifier, $keys);
-        
+
         if ($result > 0) {
             // Clear cache for all deleted keys
             foreach ($keys as $key) {
                 $this->cache->forget($identifier, $key);
             }
         }
-        
+
         return $result;
     }
 
     public function deleteByIdentifier(MetaIdentifier $identifier): int
     {
         $result = $this->repository->deleteByIdentifier($identifier);
-        
+
         if ($result > 0) {
             $this->cache->forgetByIdentifier($identifier);
         }
-        
+
         return $result;
     }
 
@@ -101,9 +101,10 @@ class CachedMetaRepository implements MetaRepositoryInterface
         // Check cache first
         if ($this->cache->has($identifier, $key)) {
             $meta = $this->cache->get($identifier, $key);
+
             return $meta !== null;
         }
-        
+
         return $this->repository->exists($identifier, $key);
     }
 
