@@ -11,6 +11,7 @@ use OnaOnbir\OOMetas\Repositories\CachedMetaRepository;
 class OOMetasStatusCommand extends Command
 {
     protected $signature = 'oo-metas:status';
+
     protected $description = 'Show OOMetas configuration and cache status';
 
     public function handle(): int
@@ -25,8 +26,8 @@ class OOMetasStatusCommand extends Command
         $cachePrefix = config('oo-metas.cache.prefix', 'oo_metas');
         $cacheDriver = config('cache.default', 'null');
 
-        $this->line("   Enabled: " . ($cacheEnabled ? '✅ Yes' : '❌ No'));
-        $this->line("   TTL: {$cacheTtl} seconds (" . gmdate('H:i:s', $cacheTtl) . ")");
+        $this->line('   Enabled: '.($cacheEnabled ? '✅ Yes' : '❌ No'));
+        $this->line("   TTL: {$cacheTtl} seconds (".gmdate('H:i:s', $cacheTtl).')');
         $this->line("   Prefix: {$cachePrefix}");
         $this->line("   Driver: {$cacheDriver}");
         $this->line('');
@@ -38,7 +39,7 @@ class OOMetasStatusCommand extends Command
 
         $this->line('🏗️ <info>Repository Status:</info>');
         $this->line("   Type: {$repositoryType}");
-        $this->line("   Caching: " . ($isCached ? '✅ Active (CachedMetaRepository)' : '❌ Disabled (MetaRepository)'));
+        $this->line('   Caching: '.($isCached ? '✅ Active (CachedMetaRepository)' : '❌ Disabled (MetaRepository)'));
         $this->line('');
 
         // Performance Configuration
@@ -58,19 +59,19 @@ class OOMetasStatusCommand extends Command
 
         // Recommendations
         $this->line('💡 <info>Recommendations:</info>');
-        
-        if (!$cacheEnabled) {
+
+        if (! $cacheEnabled) {
             $this->warn('   • Enable caching for better performance: OO_METAS_CACHE_ENABLED=true');
         }
-        
+
         if ($cacheDriver === 'null') {
             $this->warn('   • Consider using Redis or Memcached for production: CACHE_DRIVER=redis');
         }
-        
+
         if ($cacheDriver === 'array') {
             $this->warn('   • Array cache is memory-only, consider persistent cache for production');
         }
-        
+
         if ($isCached && $cacheEnabled) {
             $this->info('   ✅ Cache is properly configured and active');
         }

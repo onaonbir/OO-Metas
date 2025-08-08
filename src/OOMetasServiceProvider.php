@@ -13,7 +13,6 @@ use OnaOnbir\OOMetas\Repositories\CachedMetaRepository;
 use OnaOnbir\OOMetas\Repositories\MetaRepository;
 use OnaOnbir\OOMetas\Services\MetaCacheService;
 use OnaOnbir\OOMetas\Services\MetaService;
-use OnaOnbir\OOMetas\Console;
 
 class OOMetasServiceProvider extends ServiceProvider
 {
